@@ -147,7 +147,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			}
 			case 0x6: { // REM
 				if (regs[rs2] == 0) { // Div by 0
-					regs[rs2] = regs[rs1];
+					result = regs[rs1];
 					break;
 				}
 				else if ((int32_t)regs[rs1] == -((int32_t)1 << (XLEN - 1)) && regs[rs2] == -1) { // Signed Div overflow
@@ -159,7 +159,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			}
 			case 0x7: { // REMU
 				if (regs[rs2] == 0) {
-					regs[rs2] = regs[rs1];
+					result = regs[rs1];
 					break;
 				}
 				result = regs[rs1] / regs[rs2];
