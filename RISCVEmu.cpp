@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "RISCV.h"
 
 int main(int argc, char** argv) {
@@ -18,8 +19,8 @@ int main(int argc, char** argv) {
 	}
 
 	try {
-		RISCV hart(argv[1], mem_start, entrypoint);
-		hart.run();
+		std::unique_ptr<RISCV> hart = std::make_unique<RISCV>(argv[1], mem_start, entrypoint);
+		hart->run();
 	}
 	catch (std::runtime_error& err) {
 		std::cout << "ERROR: " << err.what() << std::endl;
