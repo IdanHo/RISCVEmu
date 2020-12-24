@@ -14,6 +14,8 @@ class RISCV {
 	uint32_t pc = 0x0;
 	uint32_t next_pc = 0x0;
 
+	uint32_t csrs[4096] = {};
+
 	bool is_running = false;
 
 	void interpret_insn(uint32_t insn);

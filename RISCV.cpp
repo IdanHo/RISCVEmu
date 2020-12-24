@@ -9,7 +9,7 @@ RISCV::RISCV(const char* program_filename, uint32_t mem_start, uint32_t entrypoi
 	if (!program_file.is_open()) {
 		throw std::runtime_error("Failed to open program file!");
 	}
-	program_file.read((char *)mem, MEM_SIZE);
+	program_file.read((char*)mem, MEM_SIZE);
 	program_file.close();
 
 	mem_start_addr = mem_start;
@@ -401,11 +401,75 @@ void RISCV::interpret_insn(uint32_t insn) {
 		}
 		break;
 	}
-	case 0x73: { // System Instructions
+	case 0x73: { // System Instructions + Zicsr Extension
 		uint32_t funct3 = (insn >> 12) & 0x7;
-		uint32_t funct12 = (insn >> 20) & 0xFFF;
-		switch (funct3) {
-		case 0x0: { // PRIV
+		if (funct3) { // Zicsr Instructions
+			uint32_t csr = (insn >> 20) & 0xFFF;
+			switch (funct3) {
+			case 0x1: { // CSRRW
+				if (rd != 0) {
+					uint32_t old_value = csrs[csr];
+					regs[rd] = old_value;
+				}
+				csrs[csr] = regs[rs1];
+				break;
+			}
+			case 0x2: { // CSRRS
+				uint32_t old_value = csrs[csr];
+				if (rd != 0) {
+					regs[rd] = old_value;
+				}
+				if (rs1 != 0) {
+					csrs[csr] = old_value | regs[rs1];
+				}
+				break;
+			}
+			case 0x3: { // CSRRC
+				uint32_t old_value = csrs[csr];
+				if (rd != 0) {
+					regs[rd] = old_value;
+				}
+				if (rs1 != 0) {
+					csrs[csr] = old_value & (~regs[rs1]);
+				}
+				break;
+			}
+			case 0x5: { // CSRRWI
+				if (rd != 0) {
+					uint32_t old_value = csrs[csr];
+					regs[rd] = old_value;
+				}
+				csrs[csr] = rs1; // not actually a register number, a 5 bit zero-extended immediate
+				break;
+			}
+			case 0x6: { // CSRRSI
+				uint32_t old_value = csrs[csr];
+				if (rd != 0) {
+					regs[rd] = old_value;
+				}
+				if (rs1 != 0) {
+					csrs[csr] = old_value | rs1; // not actually a register number, a 5 bit zero-extended immediate
+				}
+				break;
+			}
+			case 0x7: { // CSRRCI
+				uint32_t old_value = csrs[csr];
+				if (rd != 0) {
+					regs[rd] = old_value;
+				}
+				if (rs1 != 0) {
+					csrs[csr] = old_value & (~rs1); // not actually a register number, a 5 bit zero-extended immediate
+				}
+				break;
+			}
+			default: {
+				// TODO: throw illegal instruction exception
+				return;
+			}
+			}
+		}
+		else { // PRIV
+			uint32_t funct12 = (insn >> 20) & 0xFFF;
 			if (rd != 0 || rs1 != 0) {
 				// TODO: throw illegal instruction exception
 				return;
@@ -426,12 +490,6 @@ void RISCV::interpret_insn(uint32_t insn) {
 				}
 				return;
 			}
-			break;
-		}
-		default: {
-			// TODO: throw illegal instruction exception
-			return;
-		}
 		}
 		break;
 	}
@@ -834,11 +892,42 @@ void RISCV::pretty_print(uint32_t insn) {
 		}
 		break;
 	}
-	case 0x73: { // System Instructions
+	case 0x73: { // System Instructions + Zicsr Extension
 		uint32_t funct3 = (insn >> 12) & 0x7;
-		uint32_t funct12 = (insn >> 20) & 0xFFF;
-		switch (funct3) {
-		case 0x0: { // PRIV
+		if (funct3) { // Zicsr Instructions
+			uint32_t csr = (insn >> 20) & 0xFFF;
+			switch (funct3) {
+			case 0x1: { // CSRRW
+				std::cout << "CSRRW x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
+				break;
+			}
+			case 0x2: { // CSRRS
+				std::cout << "CSRRS x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
+				break;
+			}
+			case 0x3: { // CSRRC
+				std::cout << "CSRRC x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
+				break;
+			}
+			case 0x5: { // CSRRWI
+				std::cout << "CSRRWI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
+				break;
+			}
+			case 0x6: { // CSRRSI
+				std::cout << "CSRRSI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
+				break;
+			}
+			case 0x7: { // CSRRCI
+				std::cout << "CSRRCI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
+				break;
+			}
+			default: {
+				return;
+			}
+			}
+		}
+		else { // PRIV
+			uint32_t funct12 = (insn >> 20) & 0xFFF;
 			if (rd != 0 || rs1 != 0) {
 				return;
 			}
@@ -853,8 +942,6 @@ void RISCV::pretty_print(uint32_t insn) {
 				std::cout << "ECALL" << std::endl;
 				return;
 			}
-			break;
-		}
 		}
 		break;
 	}

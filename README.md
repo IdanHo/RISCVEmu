@@ -1,6 +1,6 @@
 # RISC-V Emulator
 This is a [RISC-V](https://en.wikipedia.org/wiki/RISC-V) emulator written in C++ for Windows & Linux, using no external libraries (besides the standard c++ library).
-Currently only the RV32I base ISA (besides FENCE), and the M extension are implemented
+Currently only the RV32I base ISA (besides FENCE), the M extension and the Zicsr extension are implemented
 
 ## How to use
 Binaries for the emulator can be created using:
@@ -18,7 +18,7 @@ riscv32-unknown-elf-objdump -t out_binary
 ```
 
 ## TODO
-- Implement Zicsr Extension (to support defining the exception vector)
+- ~~Implement Zicsr Extension (to support defining the exception vector)~~
 - Implement Exception Delegation
 - Implement F (and possibly D) ISA Extensions to fully support RV32G
 - Parse RISC-V ELF & PE files to automatically determine the base address and the entrypoint address
