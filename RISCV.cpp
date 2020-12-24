@@ -32,26 +32,32 @@ void RISCV::interpret_insn(uint32_t insn) {
 		uint32_t result;
 		switch (funct3) {
 		case 0x0: { // ADDI
+			DEBUG(std::cout << "ADDI x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = (int32_t)regs[rs1] + imm;
 			break;
 		}
 		case 0x2: { // SLTI
+			DEBUG(std::cout << "SLTI x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = (int32_t)regs[rs1] < (int32_t)imm;
 			break;
 		}
 		case 0x3: { // SLTIU
+			DEBUG(std::cout << "SLTIU x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = (uint32_t)regs[rs1] < (uint32_t)imm;
 			break;
 		}
 		case 0x4: { // XORI
+			DEBUG(std::cout << "XORI x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = regs[rs1] ^ imm;
 			break;
 		}
 		case 0x6: { // ORI
+			DEBUG(std::cout << "ORI x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = regs[rs1] | imm;
 			break;
 		}
 		case 0x7: { // ANDI
+			DEBUG(std::cout << "ANDI x" << rd << ", x" << rs1 << ", " << imm << std::endl);
 			result = regs[rs1] & imm;
 			break;
 		}
@@ -62,6 +68,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				// TODO: throw illegal instruction exception
 				return;
 			}
+			DEBUG(std::cout << "SLLI x" << rd << ", x" << rs1 << ", " << shamt << std::endl);
 			result = regs[rs1] << shamt;
 			break;
 		}
@@ -73,9 +80,11 @@ void RISCV::interpret_insn(uint32_t insn) {
 				return;
 			}
 			if (shtyp) {
+				DEBUG(std::cout << "SRAI x" << rd << ", x" << rs1 << ", " << shamt << std::endl);
 				result = (int32_t)regs[rs1] >> (int32_t)shamt;
 			}
 			else {
+				DEBUG(std::cout << "SRLI x" << rd << ", x" << rs1 << ", " << shamt << std::endl);
 				result = regs[rs1] >> shamt;
 			}
 			break;
@@ -90,11 +99,13 @@ void RISCV::interpret_insn(uint32_t insn) {
 		break;
 	}
 	case 0x37: { // LUI
+		DEBUG(std::cout << "LUI x" << rd << ", " << (int32_t)(insn & 0xFFFFF000) << std::endl);
 		if (rd != 0)
 			regs[rd] = (int32_t)(insn & 0xFFFFF000);
 		break;
 	}
 	case 0x17: { // AUIPC
+		DEBUG(std::cout << "AUIPC x" << rd << ", " << (int32_t)(insn & 0xFFFFF000) << std::endl);
 		if (rd != 0)
 			regs[rd] = pc + (int32_t)(insn & 0xFFFFF000);
 		break;
@@ -110,22 +121,27 @@ void RISCV::interpret_insn(uint32_t insn) {
 			}
 			switch (funct3) {
 			case 0x0: { // MUL
+				DEBUG(std::cout << "MUL x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (int32_t)((int32_t)regs[rs1] * (int32_t)regs[rs2]);
 				break;
 			}
 			case 0x1: { // MULH
+				DEBUG(std::cout << "MULH x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (int32_t)(((int64_t)((int32_t)regs[rs1]) * (int64_t)((int32_t)regs[rs2])) >> 32);
 				break;
 			}
 			case 0x3: { // MULHU
+				DEBUG(std::cout << "MULHU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (uint32_t)(((uint64_t)((uint32_t)regs[rs1]) * (uint64_t)((uint32_t)regs[rs2])) >> 32);
 				break;
 			}
 			case 0x2: { // MULHSU
+				DEBUG(std::cout << "MULHSU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (int32_t)(((int64_t)((int32_t)regs[rs1]) * (uint64_t)((uint32_t)regs[rs2])) >> 32);
 				break;
 			}
 			case 0x4: { // DIV
+				DEBUG(std::cout << "DIV x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				if (regs[rs2] == 0) { // Div by 0
 					result = -1;
 					break;
@@ -138,6 +154,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x5: { // DIVU
+				DEBUG(std::cout << "DIVU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				if (regs[rs2] == 0) {
 					result = ((uint64_t)1 << XLEN) - 1;
 					break;
@@ -146,6 +163,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x6: { // REM
+				DEBUG(std::cout << "REM x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				if (regs[rs2] == 0) { // Div by 0
 					result = regs[rs1];
 					break;
@@ -158,6 +176,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x7: { // REMU
+				DEBUG(std::cout << "REMU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				if (regs[rs2] == 0) {
 					result = regs[rs1];
 					break;
@@ -179,42 +198,52 @@ void RISCV::interpret_insn(uint32_t insn) {
 			switch (funct3) {
 			case 0x0: { // ADD / SUB
 				if (funct7) {
+					DEBUG(std::cout << "SUB x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 					result = (int32_t)(regs[rs1] - regs[rs2]);
 				}
 				else {
+					DEBUG(std::cout << "ADD x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 					result = (int32_t)(regs[rs1] + regs[rs2]);
 				}
 				break;
 			}
 			case 0x2: { // SLT
+				DEBUG(std::cout << "SLT x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (int32_t)regs[rs1] < (int32_t)regs[rs2];
 				break;
 			}
 			case 0x3: { // SLTU
+				DEBUG(std::cout << "SLTU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = (uint32_t)regs[rs1] < (uint32_t)regs[rs2];
 				break;
 			}
 			case 0x4: { // XOR
+				DEBUG(std::cout << "XOR x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = regs[rs1] ^ regs[rs2];
 				break;
 			}
 			case 0x6: { // OR
+				DEBUG(std::cout << "OR x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = regs[rs1] | regs[rs2];
 				break;
 			}
 			case 0x7: { // AND
+				DEBUG(std::cout << "AND x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = regs[rs1] & regs[rs2];
 				break;
 			}
 			case 0x1: { // SLLI
+				DEBUG(std::cout << "SLLI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 				result = regs[rs1] << (regs[rs2] & 0x1F);
 				break;
 			}
 			case 0x5: { // SRLI / SRAI
 				if (funct7) {
+					DEBUG(std::cout << "SRAI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 					result = (int32_t)regs[rs1] >> (int32_t)(regs[rs2] & 0x1F);
 				}
 				else {
+					DEBUG(std::cout << "SRLI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl);
 					result = regs[rs1] >> (regs[rs2] & 0x1F);
 				}
 				break;
@@ -231,6 +260,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 	}
 	case 0x6F: { // JAL
 		int32_t offset = (((insn >> 21) & 0x3FF) | (((insn >> 20) & 0x1) << 10) | (((insn >> 12) & 0xFF) << 11) | ((((int32_t)insn) >> 31)) << 19) << 1;
+		DEBUG(std::cout << "JAL x" << rd << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 		if (rd != 0)
 			regs[rd] = next_pc;
 		uint32_t addr = (int32_t)pc + offset;
@@ -248,6 +278,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			return;
 		}
 		int32_t offset = ((int32_t)insn) >> 20;
+		DEBUG(std::cout << "JALR x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 		if (rd != 0)
 			regs[rd] = next_pc;
 		uint32_t addr = (((int32_t)regs[rs1] + offset) >> 1) << 1;
@@ -264,26 +295,32 @@ void RISCV::interpret_insn(uint32_t insn) {
 		bool should_branch = false;
 		switch (funct3) {
 		case 0x0: { // BEQ
+			DEBUG(std::cout << "BEQ x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = regs[rs1] == regs[rs2];
 			break;
 		}
 		case 0x1: { // BNE
+			DEBUG(std::cout << "BNE x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = regs[rs1] != regs[rs2];
 			break;
 		}
 		case 0x4: { // BLT
+			DEBUG(std::cout << "BLT x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = (int32_t)regs[rs1] < (int32_t)regs[rs2];
 			break;
 		}
 		case 0x6: { // BLTU
+			DEBUG(std::cout << "BLTU x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = regs[rs1] < regs[rs2];
 			break;
 		}
 		case 0x5: { // BGE
+			DEBUG(std::cout << "BGE x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = (int32_t)regs[rs1] >= (int32_t)regs[rs2];
 			break;
 		}
 		case 0x7: { // BGEU
+			DEBUG(std::cout << "BGEU x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl);
 			should_branch = regs[rs1] >= regs[rs2];
 			break;
 		}
@@ -307,6 +344,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 		int32_t offset = ((int32_t)insn) >> 20;
 		switch (funct3) {
 		case 0x0: { // LB
+			DEBUG(std::cout << "LB x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 			uint8_t result;
 			if (read_u8(regs[rs1] + offset, &result)) {
 				// TODO: handle raised exceptions
@@ -316,6 +354,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			break;
 		}
 		case 0x4: { // LBU
+			DEBUG(std::cout << "LBU x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 			uint8_t result;
 			if (read_u8(regs[rs1] + offset, &result)) {
 				// TODO: handle raised exceptions
@@ -325,6 +364,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			break;
 		}
 		case 0x1: { // LH
+			DEBUG(std::cout << "LH x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 			uint16_t result;
 			if (read_u16(regs[rs1] + offset, &result)) {
 				// TODO: handle raised exceptions
@@ -334,6 +374,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			break;
 		}
 		case 0x5: { // LHU
+			DEBUG(std::cout << "LHU x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 			uint16_t result;
 			if (read_u16(regs[rs1] + offset, &result)) {
 				// TODO: handle raised exceptions
@@ -343,6 +384,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			break;
 		}
 		case 0x2: { // LW
+			DEBUG(std::cout << "LW x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl);
 			uint32_t result;
 			if (read_u32(regs[rs1] + offset, &result)) {
 				// TODO: handle raised exceptions
@@ -363,18 +405,21 @@ void RISCV::interpret_insn(uint32_t insn) {
 		int32_t offset = ((insn >> 7) & 0x1F) | ((((int32_t)insn) >> 25) << 5);
 		switch (funct3) {
 		case 0x0: { // SB
+			DEBUG(std::cout << "SB x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl);
 			if (write_u8(regs[rs1] + offset, regs[rs2] & 0xFF)) {
 				// TODO: handle raised exceptions
 			}
 			break;
 		}
 		case 0x1: { // SH
+			DEBUG(std::cout << "SH x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl);
 			if (write_u16(regs[rs1] + offset, regs[rs2] & 0xFFFF)) {
 				// TODO: handle raised exceptions
 			}
 			break;
 		}
 		case 0x2: { // SW
+			DEBUG(std::cout << "SW x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl);
 			if (write_u32(regs[rs1] + offset, regs[rs2])) {
 				// TODO: handle raised exceptions
 			}
@@ -391,6 +436,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 		uint32_t funct3 = (insn >> 12) & 0x7;
 		switch (funct3) {
 		case 0x0: { // FENCE
+			DEBUG(std::cout << "FENCE ???" << std::endl);
 			// TODO: either implement fence or throw an illegal instruction exception
 			break;
 		}
@@ -407,6 +453,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 			uint32_t csr = (insn >> 20) & 0xFFF;
 			switch (funct3) {
 			case 0x1: { // CSRRW
+				DEBUG(std::cout << "CSRRW x" << rd << ", c" << csr << ", x" << rs1 << std::endl);
 				if (rd != 0) {
 					uint32_t old_value = csrs[csr];
 					regs[rd] = old_value;
@@ -415,6 +462,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x2: { // CSRRS
+				DEBUG(std::cout << "CSRRS x" << rd << ", c" << csr << ", x" << rs1 << std::endl);
 				uint32_t old_value = csrs[csr];
 				if (rd != 0) {
 					regs[rd] = old_value;
@@ -425,6 +473,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x3: { // CSRRC
+				DEBUG(std::cout << "CSRRC x" << rd << ", c" << csr << ", x" << rs1 << std::endl);
 				uint32_t old_value = csrs[csr];
 				if (rd != 0) {
 					regs[rd] = old_value;
@@ -435,6 +484,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x5: { // CSRRWI
+				DEBUG(std::cout << "CSRRWI x" << rd << ", c" << csr << ", " << rs1 << std::endl);
 				if (rd != 0) {
 					uint32_t old_value = csrs[csr];
 					regs[rd] = old_value;
@@ -443,6 +493,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x6: { // CSRRSI
+				DEBUG(std::cout << "CSRRSI x" << rd << ", c" << csr << ", " << rs1 << std::endl);
 				uint32_t old_value = csrs[csr];
 				if (rd != 0) {
 					regs[rd] = old_value;
@@ -453,6 +504,7 @@ void RISCV::interpret_insn(uint32_t insn) {
 				break;
 			}
 			case 0x7: { // CSRRCI
+				DEBUG(std::cout << "CSRRCI x" << rd << ", c" << csr << ", " << rs1 << std::endl);
 				uint32_t old_value = csrs[csr];
 				if (rd != 0) {
 					regs[rd] = old_value;
@@ -479,10 +531,12 @@ void RISCV::interpret_insn(uint32_t insn) {
 				return;
 			}
 			if (funct12) { // EBREAK
+				DEBUG(std::cout << "EBREAK" << std::endl);
 				// TODO: throw breakpoint exception
 				return;
 			}
 			else { // ECALL
+				DEBUG(std::cout << "ECALL" << std::endl);
 				// TODO: implement various services
 				if (regs[3] & 1) { // system exit
 					std::cout << "program exited with code " << (regs[3] >> 1) << std::endl;
@@ -606,15 +660,13 @@ void RISCV::run() {
 		if (read_u32(pc, &insn))
 			throw std::runtime_error("Failed fetching next instruction!");
 
-		if (DEBUG)
-			pretty_print(insn);
-
-		if (SINGLE_STEP)
-			std::cin.ignore();
-
 		if (insn == 0) { // TODO: remove this
 			is_running = false;
+			break;
 		}
+
+		if (DEBUG_PRINT)
+			print_context();
 
 		interpret_insn(insn);
 
@@ -622,328 +674,9 @@ void RISCV::run() {
 	}
 }
 
-void RISCV::pretty_print(uint32_t insn) {
+void RISCV::print_context() {
 	for (int i = 0; i < 32; i++) { // print regs
 		std::cout << "| x" << i << ": " << regs[i] << "(" << (int32_t)regs[i] << ") ";
 	}
 	std::cout << "| pc: 0x" << std::setbase(16) << pc << std::setbase(10) << std::endl;
-
-	uint32_t opcode = insn & 0x7F;
-	if (!(opcode & 0x1 && opcode & 0x2)) {
-		return;
-	}
-	uint32_t rd = (insn >> 7) & 0x1F;
-	uint32_t rs1 = (insn >> 15) & 0x1F;
-	uint32_t rs2 = (insn >> 20) & 0x1F;
-	switch (opcode) {
-	case 0x13: { // Integer Register-Immediate Instructions
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		int32_t imm = ((int32_t)insn >> 20);
-		switch (funct3) {
-		case 0x0: { // ADDI
-			std::cout << "ADDI x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x2: { // SLTI
-			std::cout << "SLTI x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x3: { // SLTIU
-			std::cout << "SLTIU x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x4: { // XORI
-			std::cout << "XORI x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x6: { // ORI
-			std::cout << "ORI x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x7: { // ANDI
-			std::cout << "ANDI x" << rd << ", x" << rs1 << ", " << imm << std::endl;
-			break;
-		}
-		case 0x1: { // SLLI
-			uint32_t shamt = imm & 0x1F;
-			uint32_t shtyp = (imm >> 5) & 0x7F;
-			if (shtyp != 0x0) {
-				return;
-			}
-			std::cout << "SLLI x" << rd << ", x" << rs1 << ", " << shamt << std::endl;
-			break;
-		}
-		case 0x5: { // SRLI / SRAI
-			uint32_t shamt = imm & 0x1F;
-			uint32_t shtyp = (imm >> 5) & 0x7F;
-			if ((shtyp & 0x5F) != 0x0) {
-				return;
-			}
-			if (shtyp) {
-				std::cout << "SRAI x" << rd << ", x" << rs1 << ", " << shamt << std::endl;
-			}
-			else {
-				std::cout << "SRLI x" << rd << ", x" << rs1 << ", " << shamt << std::endl;
-			}
-			break;
-		}
-		}
-		break;
-	}
-	case 0x37: { // LUI
-		std::cout << "LUI x" << rd << ", " << (int32_t)(insn & 0xFFFFF000) << std::endl;
-		break;
-	}
-	case 0x17: { // AUIPC
-		std::cout << "AUIPC x" << rd << ", " << (int32_t)(insn & 0xFFFFF000) << std::endl;
-		break;
-	}
-	case 0x33: { // Integer Register-Register Operations + Integer Multiplication Extension
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		uint32_t funct7 = (insn >> 25) & 0x7F;
-		if (funct7 & 0x1) {
-			if ((funct7 & 0x7E) != 0x0) {
-				return;
-			}
-			switch (funct3) {
-			case 0x0: { // MUL
-				std::cout << "MUL x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x1: { // MULH
-				std::cout << "MULH x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x3: { // MULHU
-				std::cout << "MULHU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x2: { // MULHSU
-				std::cout << "MULHSU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x4: { // DIV
-				std::cout << "DIV x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x5: { // DIVU
-				std::cout << "DIVU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x6: { // REM
-				std::cout << "REM x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x7: { // REMU
-				std::cout << "REMU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			}
-		}
-		else {
-			if ((funct7 & 0x5F) != 0x0) {
-				return;
-			}
-			switch (funct3) {
-			case 0x0: { // ADD / SUB
-				if (funct7) {
-					std::cout << "SUB x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				}
-				else {
-					std::cout << "ADD x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				}
-				break;
-			}
-			case 0x2: { // SLT
-				std::cout << "SLT x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x3: { // SLTU
-				std::cout << "SLTU x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x4: { // XOR
-				std::cout << "XOR x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x6: { // OR
-				std::cout << "OR x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x7: { // AND
-				std::cout << "AND x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x1: { // SLLI
-				std::cout << "SLLI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				break;
-			}
-			case 0x5: { // SRLI / SRAI
-				if (funct7) {
-					std::cout << "SRAI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				}
-				else {
-					std::cout << "SRLI x" << rd << ", x" << rs1 << ", x" << rs2 << std::endl;
-				}
-				break;
-			}
-			}
-		}
-		break;
-	}
-	case 0x6F: { // JAL
-		int32_t offset = (((insn >> 21) & 0x3FF) | (((insn >> 20) & 0x1) << 10) | (((insn >> 12) & 0xFF) << 11) | ((((int32_t)insn) >> 31)) << 19) << 1;
-		std::cout << "JAL x" << rd << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-		break;
-	}
-	case 0x67: { // JALR
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		if (funct3 != 0x0) {
-			return;
-		}
-		int32_t offset = ((int32_t)insn) >> 20;
-		std::cout << "JALR x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-		break;
-	}
-	case 0x63: { // Conditional Branches
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		int32_t offset = (((insn >> 8) & 0xF) | (((insn >> 25) & 0x3F) << 4) | (((insn >> 7) & 0x1) << 10) | ((((int32_t)insn) >> 31)) << 11) << 1;
-		switch (funct3) {
-		case 0x0: { // BEQ
-			std::cout << "BEQ x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x1: { // BNE
-			std::cout << "BNE x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x4: { // BLT
-			std::cout << "BLT x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x6: { // BLTU
-			std::cout << "BLTU x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x5: { // BGE
-			std::cout << "BGE x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x7: { // BGEU
-			std::cout << "BGEU x" << rs1 << ", x" << rs2 << ", pc" << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		}
-		break;
-	}
-	case 0x3: { // Load Instructions
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		int32_t offset = ((int32_t)insn) >> 20;
-		switch (funct3) {
-		case 0x0: { // LB
-			std::cout << "LB x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x4: { // LBU
-			std::cout << "LBU x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x1: { // LH
-			std::cout << "LH x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x5: { // LHU
-			std::cout << "LHU x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		case 0x2: { // LW
-			std::cout << "LW x" << rd << ", x" << rs1 << std::showpos << offset << std::noshowpos << std::endl;
-			break;
-		}
-		}
-		break;
-	}
-	case 0x23: { // Store Instructions
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		int32_t offset = ((insn >> 7) & 0x1F) | ((((int32_t)insn) >> 25) << 5);
-		switch (funct3) {
-		case 0x0: { // SB
-			std::cout << "SB x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl;
-			break;
-		}
-		case 0x1: { // SH
-			std::cout << "SH x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl;
-			break;
-		}
-		case 0x2: { // SW
-			std::cout << "SW x" << rs1 << std::showpos << offset << std::noshowpos << ", x" << rs2 << std::endl;
-			break;
-		}
-		}
-		break;
-	}
-	case 0xF: { // Memory Ordering Instructions
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		switch (funct3) {
-		case 0x0: { // FENCE
-			std::cout << "FENCE ???" << std::endl;
-			break;
-		}
-		}
-		break;
-	}
-	case 0x73: { // System Instructions + Zicsr Extension
-		uint32_t funct3 = (insn >> 12) & 0x7;
-		if (funct3) { // Zicsr Instructions
-			uint32_t csr = (insn >> 20) & 0xFFF;
-			switch (funct3) {
-			case 0x1: { // CSRRW
-				std::cout << "CSRRW x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
-				break;
-			}
-			case 0x2: { // CSRRS
-				std::cout << "CSRRS x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
-				break;
-			}
-			case 0x3: { // CSRRC
-				std::cout << "CSRRC x" << rd << ", c" << csr << ", x" << rs1 << std::endl;
-				break;
-			}
-			case 0x5: { // CSRRWI
-				std::cout << "CSRRWI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
-				break;
-			}
-			case 0x6: { // CSRRSI
-				std::cout << "CSRRSI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
-				break;
-			}
-			case 0x7: { // CSRRCI
-				std::cout << "CSRRCI x" << rd << ", c" << csr << ", " << rs1 << std::endl;
-				break;
-			}
-			default: {
-				return;
-			}
-			}
-		}
-		else { // PRIV
-			uint32_t funct12 = (insn >> 20) & 0xFFF;
-			if (rd != 0 || rs1 != 0) {
-				return;
-			}
-			if (funct12 & 0xFFE) {
-				return;
-			}
-			if (funct12) { // EBREAK
-				std::cout << "EBREAK" << std::endl;
-				return;
-			}
-			else { // ECALL
-				std::cout << "ECALL" << std::endl;
-				return;
-			}
-		}
-		break;
-	}
-	}
 }
