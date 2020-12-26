@@ -8,7 +8,7 @@ Binaries for the emulator can be created using:
 riscv32-unknown-elf-gcc -Wl,-Ttext=0x0 -nostdlib -march=rv32im -o out_binary source.c
 riscv32-unknown-elf-objcopy -O binary out_binary out_binary.bin
 ```
-and then ran using:
+and then run using:
 ```bash
 RISCVEmu out_binary.bin entrypoint_address
 ```
